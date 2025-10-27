@@ -3,15 +3,18 @@ from PIL import Image
 import io
 from google import genai
 
-# Initialize the Gemini API client
+# Hardcode your Gemini API token here
+API_TOKEN = "YOUR_GEMINI_API_TOKEN_HERE"  # Replace with your actual API token
+
+# Initialize the Gemini API client using the hardcoded API token
 def get_gemini_client(api_token):
     """ Initialize the Gemini API client with the provided API token. """
     return genai.Client(api_key=api_token)
 
 # Function to call the Gemini API for recipe generation
-def get_recipe_from_image(image, api_token):
-    # Initialize the Gemini client using the provided API token
-    client = get_gemini_client(api_token)
+def get_recipe_from_image(image):
+    # Initialize the Gemini client using the hardcoded API token
+    client = get_gemini_client(API_TOKEN)
 
     # Convert the uploaded image to bytes
     img_byte_arr = io.BytesIO()
@@ -35,13 +38,6 @@ def app():
     st.title("Recipe Generator")
     st.write("Upload an image of an ingredient or dish, and we'll generate a recipe for you!")
 
-    # User inputs the API token here
-    api_token = st.text_input("Enter your Gemini API Token:", type="password")
-
-    if not api_token:
-        st.warning("Please enter your API token to proceed.")
-        return
-
     # Button to open camera or upload file
     image_file = st.file_uploader("Upload an image of a dish or ingredient", type=["jpg", "jpeg", "png"])
 
@@ -54,7 +50,7 @@ def app():
             st.write("Generating recipe... Please wait.")
             
             # Call Gemini API to generate the recipe
-            recipe_data = get_recipe_from_image(image, api_token)
+            recipe_data = get_recipe_from_image(image)
             
             if recipe_data:
                 # Displaying the generated recipe
