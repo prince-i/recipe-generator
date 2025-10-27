@@ -4,23 +4,31 @@ import io
 from google import genai
 
 # Initialize the Gemini API client
-client = genai.Client()
+def get_gemini_client(api_token):
+    """ Initialize the Gemini API client with the provided API token. """
+    return genai.Client(api_key=api_token)
 
 # Function to call the Gemini API for recipe generation
 def get_recipe_from_image(image, api_token):
-    # First, convert the image to a suitable format (base64 or binary) for the API.
+    # Initialize the Gemini client using the provided API token
+    client = get_gemini_client(api_token)
+
+    # Convert the uploaded image to bytes
     img_byte_arr = io.BytesIO()
     image.save(img_byte_arr, format='PNG')
     img_byte_arr = img_byte_arr.getvalue()
-    
-    # You may need to adjust this API call to correctly handle image processing in Gemini
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",  # Specify the Gemini model you're using
-        contents="Generate a recipe based on this image",  # You might need to refine this prompt
-        image_data=img_byte_arr,  # Image data to send to the model
-    )
-    
-    return response
+
+    # Generate the recipe content using Gemini API
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",  # Specify the Gemini model
+            contents="Generate a recipe based on this image",  # You can customize this prompt
+            image_data=img_byte_arr  # Image data to send to the model
+        )
+        return response
+    except Exception as e:
+        st.error(f"Error generating recipe: {e}")
+        return None
 
 # Streamlit app interface
 def app():
@@ -45,10 +53,11 @@ def app():
         if st.button("Generate Recipe"):
             st.write("Generating recipe... Please wait.")
             
-            # Call the Gemini API to generate the recipe
+            # Call Gemini API to generate the recipe
             recipe_data = get_recipe_from_image(image, api_token)
             
             if recipe_data:
+                # Displaying the generated recipe
                 st.subheader("Recipe Name:")
                 st.write(recipe_data.get('name', 'N/A'))
 
